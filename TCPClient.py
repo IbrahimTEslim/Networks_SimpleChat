@@ -20,13 +20,13 @@ def receive_messages():
     while True:
         try:
             # Receive data from the server
-            data = client_socket.recv(1024)
+            data = client_socket.recv(1024).decode()
             if not data:
                 break
 
             # Print the message to the console
             # print(data.decode(), colors[color])
-            print('\n', data.decode(), colors[color], '\n')
+            print('\r\n', data, colors[color], '\r\n')
         except:
             client_socket.close()
             break
@@ -52,6 +52,13 @@ while True:
 
     # Get input from the user
     message = input()
+
+    if message.startswith('\color_'):
+        new_color = message.split('_')[1]
+        old_color = color
+        color = new_color if new_color in colors else old_color
+        print(colors[color])
+            
 
     # Send the message to the server
     client_socket.send(message.encode())

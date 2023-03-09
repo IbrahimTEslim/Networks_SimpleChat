@@ -39,27 +39,34 @@ def handle_client(client_socket, client_address):
     connected_clients[client_socket]['color'] = color
     
     # Send a welcome message to the client
-    client_socket.send(f"Welcome to the chat room, {username}!\n".encode())
+    client_socket.send(f"Welcome to the chat room, {username}!\r\n".encode())
 
     # Print client address in server's terminal
     print("Client Connected: " + str(client_address))
     
     for c in connected_clients.keys():
         if c != client_socket:
+            temp = f"""\r\n<<<========  {connected_clients[client_socket]['username']} has just joined the room  ========>>>\r\n"""
             c.send(
-                f"{connected_clients[client_socket]['username']} has just joined the room".encode())
+                temp.encode())
 
     while True:
         try:
             # Receive data from the client
-            data = client_socket.recv(1024)
+            data = client_socket.recv(1024).decode()
             if not data:
                 break
+            
+            if data.startswith('\color_'):
+                new_color = data.split('_')[1]
+                old_color = connected_clients[client_socket]['color']
+                connected_clients[client_socket]['color'] = new_color if new_color in colors else old_color
+                continue
             
             # Broadcast the message to all connected clients
             for c in connected_clients.keys():
                 if c != client_socket:
-                    msg = f"{connected_clients[client_socket]['username']}: {data.decode()}"
+                    msg = f"{connected_clients[client_socket]['username']}: {data}"
                     co = connected_clients[client_socket]['color']
                     colored_msg = colored(msg, co)
                     c.send(colored_msg.encode())
@@ -74,7 +81,7 @@ def handle_client(client_socket, client_address):
 def list_clients(client_socket):
     client_list = ""
     for c in connected_clients.values():
-        client_list += c.username + "\n"
+        client_list += c['username'] + "\n"
     if client_list == "":
         client_list = "No other clients connected\n"
     client_socket.send(client_list.encode())
