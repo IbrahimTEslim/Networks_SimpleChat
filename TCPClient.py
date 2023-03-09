@@ -1,10 +1,12 @@
 import socket
 import threading
-
+from helpers.color_helper import colors
 # Define constants for the client
 HOST = 'localhost'
-PORT = 8000
+PORT = 45863
 
+color = 'normal'
+    
 # Create a socket object
 client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -23,7 +25,8 @@ def receive_messages():
                 break
 
             # Print the message to the console
-            print(data.decode())
+            # print(data.decode(), colors[color])
+            print('\n', data.decode(), colors[color], '\n')
         except:
             client_socket.close()
             break
@@ -33,7 +36,20 @@ def receive_messages():
 receive_thread = threading.Thread(target=receive_messages)
 receive_thread.start()
 
+
+name = input("please enter your name: ")
+client_socket.send(name.strip().encode())
+
+color = input("please choose a color from {}:  ".format(list(colors.keys())))
+if color not in colors:
+    print("Not Valid Color, normal is default")
+    color = 'normal'
+    
+client_socket.send(color.strip().encode())
+
+
 while True:
+
     # Get input from the user
     message = input()
 

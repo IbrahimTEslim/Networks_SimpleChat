@@ -1,9 +1,11 @@
 import socket
 import threading
+from helpers.color_helper import colors, colored
+#from munch import Munch
 
 # Define constants for the server
 HOST = 'localhost'
-PORT = 8000
+PORT = 45863
 MAX_CLIENTS = 5
 
 # Create a dictionary to hold all connected clients and their usernames
@@ -19,22 +21,33 @@ server_socket.bind((HOST, PORT))
 server_socket.listen(MAX_CLIENTS)
 
 
+
+
 # Function to handle incoming client connections
 def handle_client(client_socket, client_address):
     # Prompt the client for their username
-    client_socket.send(b"Please enter your username: ")
     username = client_socket.recv(1024).decode().strip()
 
     # Add the client to the dictionary of connected clients
-    connected_clients[client_socket] = username
+    connected_clients[client_socket] = {'username' : username}
 
+    color = client_socket.recv(1024).decode().strip()
+    
+    if color not in colors: color = 'normal'
+    
+    # Add the client to the dictionary of connected clients
+    connected_clients[client_socket]['color'] = color
+    
     # Send a welcome message to the client
     client_socket.send(f"Welcome to the chat room, {username}!\n".encode())
 
+    # Print client address in server's terminal
+    print("Client Connected: " + str(client_address))
+    
     for c in connected_clients.keys():
         if c != client_socket:
             c.send(
-                f"{connected_clients[client_socket]} has just joined the room".encode())
+                f"{connected_clients[client_socket]['username']} has just joined the room".encode())
 
     while True:
         try:
@@ -42,12 +55,14 @@ def handle_client(client_socket, client_address):
             data = client_socket.recv(1024)
             if not data:
                 break
-
+            
             # Broadcast the message to all connected clients
             for c in connected_clients.keys():
                 if c != client_socket:
-                    c.send(
-                        f"{connected_clients[client_socket]}: {data.decode()}".encode())
+                    msg = f"{connected_clients[client_socket]['username']}: {data.decode()}"
+                    co = connected_clients[client_socket]['color']
+                    colored_msg = colored(msg, co)
+                    c.send(colored_msg.encode())
         except:
             # Remove the client from the dictionary of connected clients
             del connected_clients[client_socket]
@@ -59,7 +74,7 @@ def handle_client(client_socket, client_address):
 def list_clients(client_socket):
     client_list = ""
     for c in connected_clients.values():
-        client_list += c + "\n"
+        client_list += c.username + "\n"
     if client_list == "":
         client_list = "No other clients connected\n"
     client_socket.send(client_list.encode())
