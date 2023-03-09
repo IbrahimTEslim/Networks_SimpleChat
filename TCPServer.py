@@ -46,7 +46,7 @@ def handle_client(client_socket, client_address):
     
     for c in connected_clients.keys():
         if c != client_socket:
-            temp = f"""\r\n<<<========  {connected_clients[client_socket]['username']} has just joined the room  ========>>>\r\n"""
+            temp = f"""\r\n\x1b[3m<<<========  {connected_clients[client_socket]['username']} has just joined the room  ========>>>\x1b[0m\r\n"""
             c.send(
                 temp.encode())
 
@@ -57,8 +57,8 @@ def handle_client(client_socket, client_address):
             if not data:
                 break
             
-            if data.startswith('\color_'):
-                new_color = data.split('_')[1]
+            if data.startswith('\color '):
+                new_color = data.split(' ')[1]
                 old_color = connected_clients[client_socket]['color']
                 connected_clients[client_socket]['color'] = new_color if new_color in colors else old_color
                 continue

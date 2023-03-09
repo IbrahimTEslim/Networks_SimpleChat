@@ -44,7 +44,7 @@ color = input("please choose a color from {}:  ".format(list(colors.keys())))
 if color not in colors:
     print("Not Valid Color, normal is default")
     color = 'normal'
-    
+print("\r\n\x1b[4mTo change the color later on type:\x1b[0m \"\\color \x1b[3mthe_new_color\x1b[0m\"")
 client_socket.send(color.strip().encode())
 
 
