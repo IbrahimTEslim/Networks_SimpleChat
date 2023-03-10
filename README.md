@@ -51,6 +51,6 @@ Lunch clients
 - [@Ibrahim Isleem](https://github.com/IbrahimTEslim)
 - [@Ahmed Elhelou](https://github.com/Ahmed-elhelou)
 - [@Osama AlNahhal](https://github.com/Osama-M-AlNahhal)
-- [@Abedalla Sbeata](https://github.com/Abedalla-Sbeata)
+- [@Abedalla Sbeata](https://github.com/AbdullahSbeata)
 
 
