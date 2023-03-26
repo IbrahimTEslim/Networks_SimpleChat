@@ -11,6 +11,7 @@ MAX_CLIENTS = 5
 
 # Create a dictionary to hold all connected clients and their usernames
 connected_clients = {}
+username_to_session = {}
 usernames_set = set()
 
 # Create a socket object
@@ -46,7 +47,10 @@ def handle_client(client_socket, client_address):
 
     # Add the client to the dictionary of connected clients
     connected_clients[client_socket]["username"] = username
-
+    
+    # Add the session object to the dictionary of connected clients
+    username_to_session[username] = client_socket
+    
     # Add the client's username to the set of connected clients usernames
     usernames_set.add(username)
 
@@ -76,19 +80,24 @@ def handle_client(client_socket, client_address):
                 )
                 continue
 
-            if data.startswith("\dm_"):
+            if data.startswith("@"):
                 data_space_splitted = data.split(" ")
-                sent_msg = data_space_splitted[1]
+                sent_msg = ' '.join(data_space_splitted[1:])
                 sent_msg = f"{connected_clients[client_socket]['username']}: {sent_msg}"
-                dm_part = data_space_splitted[0]
-                name = dm_part.split("_")[1]
+                # dm_part = data_space_splitted[0]
+                name = data_space_splitted[0][1:]
                 co = connected_clients[client_socket]["color"]
                 colored_msg = colored("\x1b[4m" + sent_msg + "\x1b[0m", co)
+                
+                if name not in username_to_session: continue
+                
+                username_to_session[name].send(colored_msg.encode())
+                
                 # msg = "\\x1B[4m" + sent_msg + "\\x1B[0m"
-                for c in connected_clients.keys():
-                    if connected_clients[c]["username"] == name:
-                        c.send(colored_msg.encode())
-                        continue
+                # for c in connected_clients.keys():
+                #     if connected_clients[c]["username"] == name:
+                #         c.send(colored_msg.encode())
+                #         continue
                 continue
 
             # Broadcast the message to all connected clients
